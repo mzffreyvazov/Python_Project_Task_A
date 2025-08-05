@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ user.name }} - AI Onboarding Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            min-height: calc(100vh - 40px);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+
+        .user-info {
+            background: rgba(255,255,255,0.2);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            backdrop-filter: blur(10px);
+        }
+
+        .user-info h2 {
+            margin-bottom: 10px;
+        }
+
+        .role-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.3);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin: 5px 0;
+        }
+
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .main-content {
+            padding: 40px;
+        }
+
+        .chatbot-container {
+            background: #f8f9fa;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .chatbot-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .chatbot-header h3 {
+            color: #333;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .chatbot-subtitle {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .chat-messages {
+            height: 400px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.1);
+            scroll-behavior: smooth;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            padding: 15px 20px;
+            border-radius: 15px;
+            max-width: 85%;
+            word-wrap: break-word;
+            line-height: 1.5;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message.bot {
+            background: #e3f2fd;
+            color: #333;
+            border: 1px solid #bbdefb;
+            border-bottom-left-radius: 5px;
+            position: relative;
+        }
+
+        .message.bot::before {
+            content: "🤖";
+            position: absolute;
+            left: -10px;
+            top: -5px;
+            background: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            border: 2px solid #2196f3;
+        }
+
+        .chat-input-container {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .chat-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .chat-send {
+            padding: 15px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            min-width: 100px;
+        }
+
+        .chat-send:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .chat-send:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 15px;
+            background: #fff3e0;
+            border-radius: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #ff9800;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            background: #f5f5f5;
+            border-radius: 15px;
+            max-width: 85%;
+            border-bottom-left-radius: 5px;
+        }
+
+        .typing-indicator.show {
+            display: block;
+        }
+
+        .typing-dots {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .typing-dots span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #999;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-dots span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+
+        .quick-questions {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .quick-questions h4 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .quick-question-btn {
+            display: inline-block;
+            margin: 5px;
+            padding: 8px 15px;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 20px;
+            color: #333;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .quick-question-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #f44336;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                min-height: calc(100vh - 20px);
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .logout-btn {
+                position: relative;
+                top: 0;
+                right: 0;
+                margin-top: 15px;
+            }
+
+            .main-content {
+                padding: 20px;
+            }
+
+            .chatbot-container {
+                padding: 20px;
+            }
+
+            .chat-messages {
+                height: 300px;
+                padding: 15px;
+            }
+
+            .message {
+                max-width: 95%;
+                padding: 12px 15px;
+            }
+
+            .chat-input-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .chat-input, .chat-send {
+                width: 100%;
+            }
+
+            .quick-question-btn {
+                display: block;
+                margin: 8px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <a href="/logout" class="logout-btn">Çıxış</a>
+            <h1>🤖 AI Onboarding Asistantı</h1>
+
+            <div class="user-info">
+                <h2>Xoş gəlmisiniz, {{ user.name }}! 👋</h2>
+                <div class="role-badge">
+                    {% if user.role == 'admin' %}
+                        🔧 Admin
+                    {% elif user.role == 'minister' %}
+                        👔 Nazirlik işçisi / rəhbər şəxs
+                    {% elif user.role == 'analyst' %}
+                        📊 Data yükləyici / analitik
+                    {% endif %}
+                </div>
+                <p style="margin-top: 10px; opacity: 0.9;">
+                    <strong>İstifadəçi:</strong> {{ user.username }}
+                </p>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="chatbot-container">
+                <div class="chatbot-header">
+                    <h3>🎯 Onboarding Asistantı</h3>
+                    <p class="chatbot-subtitle">
+                        Nazirliyin strukturu, proseslər və sənədlər haqqında suallarınızı verin
+                        <br><small>Gemini 2.5 Flash AI ilə təchiz edilmişdir</small>
+                    </p>
+                </div>
+
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message bot">
+                        Salam {{ user.name }}! 🌟 Mən sizin AI onboarding asistantınızam.
+
+                        {% if user.role == 'admin' %}
+                        Admin olaraq bütün sistemlər və məlumatlar haqqında suallar vərə bilərsiniz.
+                        {% elif user.role == 'minister' %}
+                        Nazirlik rəhbəri olaraq layihə statusları, dashboard məlumatları və ümumi proseslər haqqında kömək edə bilərəm.
+                        {% elif user.role == 'analyst' %}
+                        Data analitik olaraq data təhlili, yükləmə prosesləri və hesabatlar haqqında məlumat verə bilərəm.
+                        {% endif %}
+
+                        Necə kömək edə bilərəm? 🤔
+                    </div>
+                </div>
+
+                <div class="typing-indicator" id="typingIndicator">
+                    <div class="typing-dots">
+                        AI cavab hazırlayır
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+
+                <div class="loading" id="loading">
+                    🤖 AI cavab hazırlayır, zəhmət olmasa gözləyin...
+                </div>
+
+                <div class="error-message" id="errorMessage"></div>
+
+                <div class="chat-input-container">
+                    <input
+                        type="text"
+                        class="chat-input"
+                        id="chatInput"
+                        placeholder="Sualınızı yazın... (məsələn: 'Nazirliyin strukturu necədir?')"
+                        onkeypress="handleKeyPress(event)"
+                        maxlength="500"
+                    >
+                    <button class="chat-send" id="sendBtn" onclick="sendMessage()">
+                        Göndər
+                    </button>
+                </div>
+
+                <div class="quick-questions">
+                    <h4>💡 Tez-tez verilən suallar:</h4>
+                    <span class="quick-question-btn" onclick="askQuickQuestion('Nazirliyin strukturu necədir?')">
+                        🏢 Nazirlik strukturu
+                    </span>
+                    <span class="quick-question-btn" onclick="askQuickQuestion('Məzuniyyət necə alınır?')">
+                        🏖️ Məzuniyyət qaydaları
+                    </span>
+                    <span class="quick-question-btn" onclick="askQuickQuestion('Rəqəmsal həkimlik layihəsinin statusu nədir?')">
+                        🚀 Layihə statusları
+                    </span>
+                    <span class="quick-question-btn" onclick="askQuickQuestion('HR şöbəsi ilə necə əlaqə saxlayım?')">
+                        📞 Əlaqə məlumatları
+                    </span>
+                    <span class="quick-question-btn" onclick="askQuickQuestion('Sənəd nümunələri harada?')">
+                        📄 Sənəd şablonları
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isProcessing = false;
+
+        function addMessage(text, sender, animate = true) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+
+            if (animate) {
+                messageDiv.style.opacity = '0';
+                messageDiv.style.transform = 'translateY(10px)';
+            }
+
+            messageDiv.innerHTML = text.replace(/\n/g, '<br>');
+            messagesContainer.appendChild(messageDiv);
+
+            if (animate) {
+                setTimeout(() => {
+                    messageDiv.style.transition = 'all 0.3s ease-out';
+                    messageDiv.style.opacity = '1';
+                    messageDiv.style.transform = 'translateY(0)';
+                }, 50);
+            }
+
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function showTyping(show = true) {
+            const typingIndicator = document.getElementById('typingIndicator');
+            const loading = document.getElementById('loading');
+
+            if (show) {
+                typingIndicator.classList.add('show');
+                loading.classList.add('show');
+            } else {
+                typingIndicator.classList.remove('show');
+                loading.classList.remove('show');
+            }
+        }
+
+        function showError(message) {
+            const errorElement = document.getElementById('errorMessage');
+            errorElement.textContent = message;
+            errorElement.classList.add('show');
+            setTimeout(() => {
+                errorElement.classList.remove('show');
+            }, 5000);
+        }
+
+        function setInputState(disabled = true) {
+            const input = document.getElementById('chatInput');
+            const sendBtn = document.getElementById('sendBtn');
+
+            input.disabled = disabled;
+            sendBtn.disabled = disabled;
+
+            if (disabled) {
+                sendBtn.textContent = 'Göndərilir...';
+            } else {
+                sendBtn.textContent = 'Göndər';
+            }
+        }
+
+        async function sendMessage() {
+            if (isProcessing) return;
+
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+
+            if (!message) {
+                showError('Zəhmət olmasa bir mesaj yazın!');
+                return;
+            }
+
+            if (message.length > 500) {
+                showError('Mesaj çox uzundur! Zəhmət olmasa qısaldın.');
+                return;
+            }
+
+            isProcessing = true;
+
+            // Add user message
+            addMessage(message, 'user');
+            input.value = '';
+
+            // Show loading states
+            setInputState(true);
+            showTyping(true);
+
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    addMessage(data.response, 'bot');
+                } else {
+                    throw new Error(data.error || 'Bilinməyən xəta baş verdi');
+                }
+
+            } catch (error) {
+                console.error('Chat error:', error);
+
+                let errorMsg = 'Üzr istəyirəm, texniki problem yarandı. ';
+
+                if (error.message.includes('Failed to fetch')) {
+                    errorMsg += 'İnternet bağlantınızı yoxlayın.';
+                } else if (error.message.includes('500')) {
+                    errorMsg += 'Server xətası. Bir neçə dəqiqə sonra yenidən cəhd edin.';
+                } else {
+                    errorMsg += 'Zəhmət olmasa səhifəni yeniləyin və yenidən cəhd edin.';
+                }
+
+                addMessage(errorMsg, 'bot');
+                showError('Bağlantı xətası baş verdi!');
+            } finally {
+                // Hide loading states
+                showTyping(false);
+                setInputState(false);
+                isProcessing = false;
+
+                // Focus back to input
+                input.focus();
+            }
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function askQuickQuestion(question) {
+            if (isProcessing) return;
+
+            const input = document.getElementById('chatInput');
+            input.value = question;
+            sendMessage();
+        }
+
+        // Auto-scroll to bottom on page load
+        window.addEventListener('load', function() {
+            const messagesContainer = document.getElementById('chatMessages');
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            // Focus on input
+            document.getElementById('chatInput').focus();
+        });
+
+        // Prevent form submission on Enter if processing
+        document.getElementById('chatInput').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' && isProcessing) {
+                event.preventDefault();
+            }
+        });
+
+        // Auto-resize chat input
+        document.getElementById('chatInput').addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+        });
+
+        console.log('🤖 AI Onboarding Dashboard Loaded');
+        console.log('👤 User:', '{{ user.name }}', '({{ user.role }})');
+        console.log('🔑 Session Active');
+    </script>
+</body>
+</html>

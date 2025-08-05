@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sənəd İdarəetməsi - Nazirlik AI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        .upload-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 30px;
+        }
+        .file-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .file-card {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .file-card:hover {
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        .file-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .file-type {
+            background: #007bff;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        .file-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+        }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-warning { background: #ffc107; color: #212529; }
+        .search-box {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+            flex: 1;
+        }
+        .category-filter {
+            margin-bottom: 20px;
+        }
+        .category-filter select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📁 Sənəd İdarəetməsi</h1>
+            <div>
+                <a href="/dashboard" class="btn btn-secondary">🏠 Ana Səhifə</a>
+                {% if user.role == 'admin' %}
+                <a href="/download-all" class="btn btn-warning">📦 Hamısını Yüklə</a>
+                <a href="/export-data" class="btn btn-success">💾 Tam Eksport</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Upload Section -->
+        <div class="upload-section">
+            <h3>📤 Yeni Sənəd Yüklə</h3>
+            <form id="uploadForm" enctype="multipart/form-data">
+                <div style="display: grid; grid-template-columns: 1fr 200px 200px auto; gap: 10px; align-items: end;">
+                    <div>
+                        <label>Fayl Seç:</label>
+                        <input type="file" name="file" id="fileInput" required style="width: 100%; padding: 8px;">
+                    </div>
+                    <div>
+                        <label>Kateqoriya:</label>
+                        <select name="category" style="width: 100%; padding: 8px;">
+                            <option value="HR Sənədləri">HR Sənədləri</option>
+                            <option value="Layihələr">Layihələr</option>
+                            <option value="Qaydalar">Qaydalar</option>
+                            <option value="Hesabatlar">Hesabatlar</option>
+                            <option value="Ümumi">Ümumi</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Təsvir:</label>
+                        <input type="text" name="description" placeholder="Qısa təsvir" style="width: 100%; padding: 8px;">
+                    </div>
+                    <button type="submit" class="btn btn-primary">📤 Yüklə</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Statistics -->
+        <div class="stats">
+            <div class="stat-card">
+                <h4 id="totalFiles">0</h4>
+                <p>Ümumi Fayllar</p>
+            </div>
+            <div class="stat-card">
+                <h4 id="totalSize">0 MB</h4>
+                <p>Ümumi Həcm</p>
+            </div>
+            <div class="stat-card">
+                <h4 id="fileTypes">0</h4>
+                <p>Fayl Növləri</p>
+            </div>
+        </div>
+
+        <!-- Search and Filter -->
+        <div class="category-filter">
+            <input type="text" id="searchBox" class="search-box" placeholder="🔍 Sənədlərdə axtarış...">
+            <select id="categoryFilter">
+                <option value="">Bütün Kateqoriyalar</option>
+                <option value="HR Sənədləri">HR Sənədləri</option>
+                <option value="Layihələr">Layihələr</option>
+                <option value="Qaydalar">Qaydalar</option>
+                <option value="Hesabatlar">Hesabatlar</option>
+                <option value="Ümumi">Ümumi</option>
+            </select>
+        </div>
+
+        <!-- Files Grid -->
+        <div id="filesGrid" class="file-grid">
+            <!-- Files will be loaded here -->
+        </div>
+    </div>
+
+    <script>
+        // Load files on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadFiles();
+            loadStats();
+        });
+
+        // Upload form handler
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const fileInput = document.getElementById('fileInput');
+
+            if (!fileInput.files[0]) {
+                alert('Zəhmət olmasa fayl seçin');
+                return;
+            }
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Fayl uğurla yükləndi!');
+                    this.reset();
+                    loadFiles();
+                    loadStats();
+                } else {
+                    alert('Xəta: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Upload error:', error);
+                alert('Yükləmə zamanı xəta baş verdi');
+            });
+        });
+
+        // Load files function
+        function loadFiles(category = '', searchQuery = '') {
+            let url = '/files';
+            const params = new URLSearchParams();
+
+            if (category) params.append('category', category);
+            if (searchQuery) {
+                url = '/search-files';
+                params.append('q', searchQuery);
+            }
+
+            fetch(url + (params.toString() ? '?' + params.toString() : ''))
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    displayFiles(data.files || data.results);
+                }
+            })
+            .catch(error => console.error('Error loading files:', error));
+        }
+
+        // Display files function
+        function displayFiles(files) {
+            const grid = document.getElementById('filesGrid');
+
+            if (files.length === 0) {
+                grid.innerHTML = '<p style="text-align: center; color: #666;">Heç bir fayl tapılmadı</p>';
+                return;
+            }
+
+            grid.innerHTML = files.map(file => `
+                <div class="file-card">
+                    <div class="file-header">
+                        <span class="file-type">${file.file_type || 'unknown'}</span>
+                        <small>${formatFileSize(file.file_size || 0)}</small>
+                    </div>
+                    <h4 style="margin: 0 0 10px 0; word-break: break-word;">${file.filename}</h4>
+                    <p style="margin: 0 0 10px 0; color: #666; font-size: 12px;">
+                        📁 ${file.category || 'Kateqoriya yox'}<br>
+                        📅 ${formatDate(file.upload_date)}
+                    </p>
+                    ${file.description ? `<p style="font-size: 14px; color: #555;">${file.description}</p>` : ''}
+                    ${file.chunk_count ? `<p style="font-size: 12px; color: #888;">📄 ${file.chunk_count} hissə</p>` : ''}
+                    <div class="file-actions">
+                        <a href="/download/${file.file_id}" class="btn btn-primary">⬇️ Yüklə</a>
+                        <button onclick="viewFile('${file.file_id}')" class="btn btn-secondary">👁️ Bax</button>
+                        <button onclick="askAboutFile('${file.filename}')" class="btn btn-success">🤖 AI Sual</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Load statistics
+        function loadStats() {
+            fetch('/file-stats')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('totalFiles').textContent = data.stats.total_files;
+                    document.getElementById('totalSize').textContent = formatFileSize(data.stats.total_size);
+                    document.getElementById('fileTypes').textContent = Object.keys(data.stats.file_types).length;
+                }
+            })
+            .catch(error => console.error('Error loading stats:', error));
+        }
+
+        // Search functionality
+        document.getElementById('searchBox').addEventListener('input', function(e) {
+            const query = e.target.value.trim();
+            const category = document.getElementById('categoryFilter').value;
+
+            if (query.length > 2) {
+                loadFiles(category, query);
+            } else if (query.length === 0) {
+                loadFiles(category);
+            }
+        });
+
+        // Category filter
+        document.getElementById('categoryFilter').addEventListener('change', function(e) {
+            const category = e.target.value;
+            const query = document.getElementById('searchBox').value.trim();
+            loadFiles(category, query);
+        });
+
+        // Utility functions
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'Tarix yox';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('az-AZ');
+        }
+
+        function viewFile(fileId) {
+            window.open(`/files/${fileId}`, '_blank');
+        }
+
+        function askAboutFile(filename) {
+            const question = prompt(`"${filename}" haqqında nə soruşmaq istəyirsiniz?`);
+            if (question) {
+                const fullQuestion = `"${filename}" sənədi haqqında: ${question}`;
+                // Redirect to chat with pre-filled question
+                window.location.href = `/dashboard?question=${encodeURIComponent(fullQuestion)}`;
+            }
+        }
+    </script>
+</body>
+</html>

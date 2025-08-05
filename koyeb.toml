@@ -1,0 +1,29 @@
+[build]
+type = "buildpack"
+
+[deploy]
+type = "web"
+
+[[services]]
+name = "nazirlik-ai-onboarding"
+type = "web"
+http_port = 5000
+regions = ["was"]  # Washington DC region
+
+[services.health_check]
+http = "/"
+
+[services.env]
+FLASK_HOST = "0.0.0.0"
+FLASK_PORT = "5000"
+FLASK_DEBUG = "False"
+SECRET_KEY = "{{ .Env.SECRET_KEY }}"
+GEMINI_API_KEY = "{{ .Env.GEMINI_API_KEY }}"
+DATABASE_PATH = "users.db"
+
+[services.instance]
+type = "nano"  # or "micro", "small" depending on your needs
+
+[services.scaling]
+min = 1
+max = 1

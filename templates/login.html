@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nazirlik AI Onboarding Sistemi - Giriş</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            width: 100%;
+            max-width: 800px;
+            min-height: 500px;
+            display: flex;
+        }
+
+        .auth-section {
+            width: 400px;
+            padding: 40px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .info-section {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: #f8f9fa;
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            opacity: 0.9;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            backdrop-filter: blur(10px);
+        }
+
+        input::placeholder {
+            color: rgba(255,255,255,0.7);
+        }
+
+        select {
+            color: #333;
+        }
+
+        select option {
+            color: #333;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+        }
+
+        .btn-primary {
+            background: white;
+            color: #f5576c;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .error {
+            color: #ffebee;
+            background: rgba(244, 67, 54, 0.2);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: rgba(255,255,255,0.8);
+            font-style: italic;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .info-content {
+            text-align: center;
+        }
+
+        .info-content h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+
+        .features {
+            list-style: none;
+            margin: 30px 0;
+        }
+
+        .features li {
+            margin: 15px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            color: #333;
+            font-weight: 500;
+        }
+
+        .demo-accounts {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 30px;
+        }
+
+        .demo-accounts h3 {
+            color: #1976d2;
+            margin-bottom: 15px;
+        }
+
+        .demo-account {
+            background: white;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+            font-family: monospace;
+            color: #333;
+            border-left: 4px solid #1976d2;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                margin: 20px;
+                min-height: auto;
+            }
+
+            .auth-section {
+                width: 100%;
+                padding: 30px;
+            }
+
+            .info-section {
+                padding: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Authentication Section -->
+        <div class="auth-section">
+            <!-- Login Form -->
+            <div class="auth-form active" id="loginForm">
+                <h1>🔐 Giriş</h1>
+                <p class="subtitle">Nazirlik AI Onboarding Sistemi</p>
+
+                <form id="loginFormElement">
+                    <div class="form-group">
+                        <label>İstifadəçi adı:</label>
+                        <input type="text" id="loginUser" placeholder="İstifadəçi adınızı daxil edin" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Şifrə:</label>
+                        <input type="password" id="loginPass" placeholder="Şifrənizi daxil edin" required>
+                    </div>
+
+                    <button type="submit" class="btn-primary" id="loginBtn">Giriş</button>
+                    <button type="button" class="btn-secondary" onclick="showSignup()">Yeni Hesab</button>
+                </form>
+
+                <div class="loading" id="loginLoading">Giriş edilir...</div>
+                <div class="error" id="loginError"></div>
+            </div>
+
+            <!-- Signup Form -->
+            <div class="auth-form" id="signupForm">
+                <h1>📝 Qeydiyyat</h1>
+                <p class="subtitle">Yeni Hesab Yaratın</p>
+
+                <form id="signupFormElement">
+                    <div class="form-group">
+                        <label>Ad Soyad:</label>
+                        <input type="text" id="signupName" placeholder="Tam adınızı daxil edin" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>İstifadəçi adı:</label>
+                        <input type="text" id="signupUser" placeholder="İstifadəçi adı seçin" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Şifrə:</label>
+                        <input type="password" id="signupPass" placeholder="Güclü şifrə yaradın" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Rol:</label>
+                        <select id="signupRole" required>
+                            <option value="">Rol seçin</option>
+                            <option value="admin">Admin</option>
+                            <option value="minister">Nazirlik işçisi / rəhbər şəxs</option>
+                            <option value="analyst">Data yükləyici / analitik</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn-primary" id="signupBtn">Qeydiyyat</button>
+                    <button type="button" class="btn-secondary" onclick="showLogin()">Girişə qayıt</button>
+                </form>
+
+                <div class="loading" id="signupLoading">Hesab yaradılır...</div>
+                <div class="error" id="signupError"></div>
+            </div>
+        </div>
+
+        <!-- Info Section -->
+        <div class="info-section">
+            <div class="info-content">
+                <h2>🤖 AI Onboarding Sistemi</h2>
+                <p style="color: #666; font-size: 1.1rem; margin-bottom: 30px;">
+                    Nazirlik işçiləri üçün Gemini 2.5 Flash AI ilə təchiz edilmiş ağıllı onboarding sistemi
+                </p>
+
+                <ul class="features">
+                    <li>🏢 Nazirlik strukturu və proseslər haqqında məlumat</li>
+                    <li>📞 Şöbə rəhbərləri və əlaqə məlumatları</li>
+                    <li>📋 Sənəd şablonları və ərizə nümunələri</li>
+                    <li>🚀 Cari layihələrin statusu və detalları</li>
+                    <li>📖 Qanunvericilik və daxili qaydalar</li>
+                </ul>
+
+                <div class="demo-accounts">
+                    <h3>🎯 Demo Hesablar</h3>
+                    <div class="demo-account">
+                        <strong>Admin:</strong> admin / admin123
+                    </div>
+                    <div class="demo-account">
+                        <strong>Nazir:</strong> nazir / nazir123
+                    </div>
+                    <div class="demo-account">
+                        <strong>Analitik:</strong> analitik / data123
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showLogin() {
+            document.getElementById('loginForm').classList.add('active');
+            document.getElementById('signupForm').classList.remove('active');
+            clearErrors();
+        }
+
+        function showSignup() {
+            document.getElementById('signupForm').classList.add('active');
+            document.getElementById('loginForm').classList.remove('active');
+            clearErrors();
+        }
+
+        function clearErrors() {
+            document.getElementById('loginError').classList.remove('show');
+            document.getElementById('signupError').classList.remove('show');
+        }
+
+        function showError(elementId, message) {
+            const errorElement = document.getElementById(elementId);
+            errorElement.textContent = message;
+            errorElement.classList.add('show');
+        }
+
+        function showLoading(elementId, show = true) {
+            const loadingElement = document.getElementById(elementId);
+            if (show) {
+                loadingElement.classList.add('show');
+            } else {
+                loadingElement.classList.remove('show');
+            }
+        }
+
+        function setButtonState(buttonId, disabled = true) {
+            const button = document.getElementById(buttonId);
+            button.disabled = disabled;
+        }
+
+        // Login form handler
+        document.getElementById('loginFormElement').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const username = document.getElementById('loginUser').value.trim();
+            const password = document.getElementById('loginPass').value.trim();
+
+            if (!username || !password) {
+                showError('loginError', 'Bütün sahələri doldurun!');
+                return;
+            }
+
+            setButtonState('loginBtn', true);
+            showLoading('loginLoading', true);
+            clearErrors();
+
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    window.location.href = '/dashboard';
+                } else {
+                    showError('loginError', data.message || 'Giriş uğursuz oldu!');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showError('loginError', 'Bağlantı xətası! Zəhmət olmasa yenidən cəhd edin.');
+            } finally {
+                setButtonState('loginBtn', false);
+                showLoading('loginLoading', false);
+            }
+        });
+
+        // Signup form handler
+        document.getElementById('signupFormElement').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('signupName').value.trim();
+            const username = document.getElementById('signupUser').value.trim();
+            const password = document.getElementById('signupPass').value.trim();
+            const role = document.getElementById('signupRole').value;
+
+            if (!name || !username || !password || !role) {
+                showError('signupError', 'Bütün sahələri doldurun!');
+                return;
+            }
+
+            if (password.length < 6) {
+                showError('signupError', 'Şifrə ən azı 6 simvol olmalıdır!');
+                return;
+            }
+
+            setButtonState('signupBtn', true);
+            showLoading('signupLoading', true);
+            clearErrors();
+
+            try {
+                const response = await fetch('/signup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        username: username,
+                        password: password,
+                        role: role
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    window.location.href = '/dashboard';
+                } else {
+                    showError('signupError', data.message || 'Qeydiyyat uğursuz oldu!');
+                }
+            } catch (error) {
+                console.error('Signup error:', error);
+                showError('signupError', 'Bağlantı xətası! Zəhmət olmasa yenidən cəhd edin.');
+            } finally {
+                setButtonState('signupBtn', false);
+                showLoading('signupLoading', false);
+            }
+        });
+
+        // Auto-fill demo account on click
+        document.querySelectorAll('.demo-account').forEach(account => {
+            account.style.cursor = 'pointer';
+            account.addEventListener('click', function() {
+                const text = this.textContent;
+                if (text.includes('admin')) {
+                    document.getElementById('loginUser').value = 'admin';
+                    document.getElementById('loginPass').value = 'admin123';
+                } else if (text.includes('nazir')) {
+                    document.getElementById('loginUser').value = 'nazir';
+                    document.getElementById('loginPass').value = 'nazir123';
+                } else if (text.includes('analitik')) {
+                    document.getElementById('loginUser').value = 'analitik';
+                    document.getElementById('loginPass').value = 'data123';
+                }
+                showLogin();
+            });
+        });
+
+        // Initialize with login form
+        showLogin();
+    </script>
+</body>
+</html>

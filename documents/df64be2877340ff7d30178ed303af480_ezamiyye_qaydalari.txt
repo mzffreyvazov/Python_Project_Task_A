@@ -1,0 +1,26 @@
+Ezamiyyə Qaydaları
+
+1. Ezamiyyə ərizəsi minimum 3 gün əvvəl təqdim edilməlidir
+2. Günlük yemək pulu: 25 AZN  
+3. Yaşayış xərci: 50 AZN
+4. Nəqliyyat xərci faktiki hesablanır
+
+Ezamiyyə ərizəsi nümunəsi:
+
+TARİX: [Tarix]
+KÖMÜNƏ: [Şöbə rəhbəri] 
+KİMDƏN: [Ad Soyad, Vəzifə]
+
+Ezamiyyə ərizəsi
+
+Hörmətli [Rəhbər adı],
+
+[Başlama tarixi] - [Bitmə tarixi] tarixləri arasında [şəhər] şəhərinə iş ezamiyyətinə göndərilməyimi xahiş edirəm.
+
+Ezamiyyənin məqsədi: [Məqsəd]
+Təxmini xərc: [Məbləğ] AZN
+
+Hörmətlə,
+[Ad Soyad]
+
+Əlaqə: Maliyyə Şöbəsi - samad.aliyev@nazirlik.gov.az
